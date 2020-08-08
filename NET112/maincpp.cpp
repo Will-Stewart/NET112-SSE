@@ -29,8 +29,11 @@ int main() {
 	//------Gaussian Blur
 	auto start = std::chrono::high_resolution_clock::now();
 
-	for (int it = 0; it != TIMES; it++) {
-		Gaussian_Blur_default();
+
+	// Time set to 50 for accuracy, repeats 50 times.
+
+	for (int it = 0; it != 50; it++) {
+		Gaussian_Blur_default_unrolled();
 	}
 
 	auto finish = std::chrono::high_resolution_clock::now();
