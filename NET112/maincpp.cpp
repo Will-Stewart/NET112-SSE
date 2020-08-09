@@ -34,6 +34,7 @@ int main() {
 
 	for (int it = 0; it != 1; it++) {
 		Gaussian_Blur_test();
+		//Gaussian_Blur_default_unrolled();
 	}
 
 	auto finish = std::chrono::high_resolution_clock::now();
@@ -151,9 +152,24 @@ void Gaussian_Blur_test() {
 
 			// use  ...=_mm256_madd_epi16(...) MORE THAN ONE TIMES
 
+			r5 = _mm256_madd_epi16(__m256i (r0), __m256i (const0));
+			r6 = _mm256_madd_epi16(__m256i (r1), __m256i (const1));
+			r7 = _mm256_madd_epi16(__m256i (r2), __m256i (const2));
+			r8 = _mm256_madd_epi16(__m256i (r3), __m256i (const1));
+			r9 = _mm256_madd_epi16(__m256i (r4), __m256i (const0));
+
+
 			// use ...=_mm256_add_epi32(...) MORE THAN ONE TIMES
 
+
+
+
+
 			// use ...=_mm256_hadd_epi32(...) MORE THAN ONE TIMES
+
+
+			// I guess adds results of all processed rows together
+
 
 			// use temp=_mm256_cvtsi256_si32(...)
 			//filt_image[row][col] = temp / 159;
@@ -180,27 +196,6 @@ void Gaussian_Blur_test() {
 	}
 }
 
-
-void Gaussian_Blur_default() {
-
-
-	short int row, col, rowOffset, colOffset;
-	short int newPixel;
-
-
-	for (row = 2; row < N - 2; row++) {
-		for (col = 2; col < M - 2; col++) {
-			newPixel = 0;
-			for (rowOffset = -2; rowOffset <= 2; rowOffset++) {
-				for (colOffset = -2; colOffset <= 2; colOffset++) {
-
-					newPixel += in_image[row + rowOffset][col + colOffset] * gaussianMask[2 + rowOffset][2 + colOffset];
-				}
-			}
-			filt_image[row][col] = newPixel / 159;
-		}
-	}
-}
 
 
 
@@ -250,6 +245,28 @@ void Gaussian_Blur_default_unrolled() {
 	}
 
 }
+
+void Gaussian_Blur_default() {
+
+
+	short int row, col, rowOffset, colOffset;
+	short int newPixel;
+
+
+	for (row = 2; row < N - 2; row++) {
+		for (col = 2; col < M - 2; col++) {
+			newPixel = 0;
+			for (rowOffset = -2; rowOffset <= 2; rowOffset++) {
+				for (colOffset = -2; colOffset <= 2; colOffset++) {
+
+					newPixel += in_image[row + rowOffset][col + colOffset] * gaussianMask[2 + rowOffset][2 + colOffset];
+				}
+			}
+			filt_image[row][col] = newPixel / 159;
+		}
+	}
+}
+
 
 
 //returns false/true, when the output image is incorrect/correct, respectively
