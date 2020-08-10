@@ -137,7 +137,7 @@ void Gaussian_Blur_test() {
 
 
 	for (row = 2; row < N - 2; row++) {
-		for (col = 2; col < M - 16; col++) {//I have put an '?' here as you will exceed the array bounds. Although it will work this is bad practice
+		for (col = 2; col < M - 2; col++) {//I have put an '?' here as you will exceed the array bounds. Although it will work this is bad practice
 
 
 
@@ -181,7 +181,7 @@ void Gaussian_Blur_test() {
 
 
 
-		for (col = 500; col < M - 2; col++) {
+		for (col = 512; col < M - 2; col++) {
 			temp = 0;
 			for (int rowOffset = -2; rowOffset <= 2; rowOffset++) {
 				for (int colOffset = -2; colOffset <= 2; colOffset++) {
