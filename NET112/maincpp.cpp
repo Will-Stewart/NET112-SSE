@@ -32,7 +32,7 @@ int main() {
 
 	// Time set to 50 for accuracy, repeats 50 times.
 
-	for (int it = 0; it != 1; it++) {
+	for (int it = 0; it != 50; it++) {
 		Gaussian_Blur_test();
 		//Gaussian_Blur_default_unrolled();
 	}
@@ -126,10 +126,10 @@ void Gaussian_Blur_test() {
 
 
 	__m256i r0, r1, r2, r3, r4, r5, r6, r7;
-	__m256i r8, r9, r10, r14, r15, const0, const1, const2, ex1, ex2, ex3;
+	__m256i r8, r9, r10, r14, r15, r16, const0, const1, const2, ex1, ex2, ex3;
 	__m128i t0, t1, t2, t3, t4, t5, c0, c1, c2;
-	short int row, col;
-	int temp;
+	short int row, col, arrnum;
+	int temp, temp1, result;
 
 	const0 = _mm256_set_epi16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 5, 4, 2);
 	const1 = _mm256_set_epi16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 9, 12, 9, 4);
@@ -137,10 +137,12 @@ void Gaussian_Blur_test() {
 
 
 	for (row = 2; row < N - 2; row++) {
-		for (col = 2; col < M - 1008 ; col++) {//I have put an '?' here as you will exceed the array bounds. Although it will work this is bad practice
+		for (col = 2; col < M - 16; col++) {//I have put an '?' here as you will exceed the array bounds. Although it will work this is bad practice
+
+
 
 			//load 16 short ints into r0. Below, you will need to process the first 5 only. 
-			r0 = _mm256_loadu_si256((__m256i*) & in_image[row - 2][col - 2]); 
+			r0 = _mm256_loadu_si256((__m256i*) & in_image[row - 2][col - 2]);
 			r1 = _mm256_loadu_si256((__m256i*) & in_image[row - 1][col - 2]);
 			r2 = _mm256_loadu_si256((__m256i*) & in_image[row - 0][col - 2]);
 			r3 = _mm256_loadu_si256((__m256i*) & in_image[row + 1][col - 2]);
@@ -157,39 +159,45 @@ void Gaussian_Blur_test() {
 
 			// use ...=_mm256_add_epi32(...) MORE THAN ONE TIMES
 
+			r14 = _mm256_add_epi32(r5, r6);
+			r15 = _mm256_add_epi32(r7, r8);
+			r16 = _mm256_add_epi32(r9, r15);
 
-
-
-
-			// use ...=_mm256_hadd_epi32(...) MORE THAN ONE TIMES
+			// R16 is final array of values
 
 
 			// I guess adds results of all processed rows together
 
 
+			result = _mm256_extract_epi16(r16, 0) + _mm256_extract_epi16(r16, 1) + _mm256_extract_epi16(r16, 2) + _mm256_extract_epi16(r16, 3) + _mm256_extract_epi16(r16, 4);
+
+
 			// use temp=_mm256_cvtsi256_si32(...)
-			//filt_image[row][col] = temp / 159;
-
-
-		//}
-
-		//padding
-
-			// Col is where it starts at
-
-		//for (col = 1022 ; col < M - 2; col++) { // modify the ? accordingly 
-		//	temp = 0;
-		//	for (int rowOffset = -2; rowOffset <= 2; rowOffset++) {
-		//		for (int colOffset = -2; colOffset <= 2; colOffset++) {
-
-		//			temp += in_image[row + rowOffset][col + colOffset] * gaussianMask[2 + rowOffset][2 + colOffset];
-		//		}
-		//	}
-		//	filt_image[row][col] = temp / 159;
-
-
+			filt_image[row][col] = result / 159;
 		}
+
+
+
+
+
+
+		for (col = 500; col < M - 2; col++) {
+			temp = 0;
+			for (int rowOffset = -2; rowOffset <= 2; rowOffset++) {
+				for (int colOffset = -2; colOffset <= 2; colOffset++) {
+
+					temp += in_image[row + rowOffset][col + colOffset] * gaussianMask[2 + rowOffset][2 + colOffset];
+				}
+			}
+			filt_image[row][col] = temp / 159;
+		}
+
+
+
+
+
 	}
+
 }
 
 
