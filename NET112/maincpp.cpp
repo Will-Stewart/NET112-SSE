@@ -74,8 +74,6 @@ int main() {
 
 
 
-
-
 void print_message(char *s, bool outcome) {
 
 	if (outcome == true)
@@ -84,8 +82,6 @@ void print_message(char *s, bool outcome) {
 		printf("\n\n\r -----%s output is INcorrect -----\n\r", s);
 
 }
-
-
 
 void Gaussian_Blur_AVX() {
 
@@ -141,7 +137,7 @@ void Gaussian_Blur_test() {
 
 
 	for (row = 2; row < N - 2; row++) {
-		for (col = 2; col < M - 2 ; col++) {//I have put an '?' here as you will exceed the array bounds. Although it will work this is bad practice
+		for (col = 2; col < M - 1008 ; col++) {//I have put an '?' here as you will exceed the array bounds. Although it will work this is bad practice
 
 			//load 16 short ints into r0. Below, you will need to process the first 5 only. 
 			r0 = _mm256_loadu_si256((__m256i*) & in_image[row - 2][col - 2]); 
@@ -152,11 +148,11 @@ void Gaussian_Blur_test() {
 
 			// use  ...=_mm256_madd_epi16(...) MORE THAN ONE TIMES
 
-			r5 = _mm256_madd_epi16(__m256i (r0), __m256i (const0));
-			r6 = _mm256_madd_epi16(__m256i (r1), __m256i (const1));
-			r7 = _mm256_madd_epi16(__m256i (r2), __m256i (const2));
-			r8 = _mm256_madd_epi16(__m256i (r3), __m256i (const1));
-			r9 = _mm256_madd_epi16(__m256i (r4), __m256i (const0));
+			r5 = _mm256_maddubs_epi16(r0, const0);
+			r6 = _mm256_maddubs_epi16(r1, const1);
+			r7 = _mm256_maddubs_epi16(r2, const2);
+			r8 = _mm256_maddubs_epi16(r3, const1);
+			r9 = _mm256_maddubs_epi16(r4, const0);
 
 
 			// use ...=_mm256_add_epi32(...) MORE THAN ONE TIMES
