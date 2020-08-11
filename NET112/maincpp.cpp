@@ -158,8 +158,8 @@ void Gaussian_Blur_test() {
 
 			r14 = _mm256_add_epi16(r5, r6);
 			r15 = _mm256_add_epi16(r7, r8);
-			r17 = _mm256_add_epi16(r14, r15);
-			r16 = _mm256_add_epi16(r9, r17);
+			r16 = _mm256_add_epi16(r14, r15);
+			r17 = _mm256_add_epi16(r9, r16);
 
 			// R16 is final array of values
 
@@ -167,7 +167,7 @@ void Gaussian_Blur_test() {
 			// I guess adds results of all processed rows together
 
 
-			result = _mm256_extract_epi16(r16, 0) + _mm256_extract_epi16(r16, 1) + _mm256_extract_epi16(r16, 2) + _mm256_extract_epi16(r16, 3) + _mm256_extract_epi16(r16, 4);
+			result = _mm256_extract_epi16(r17, 0) + _mm256_extract_epi16(r17, 1) + _mm256_extract_epi16(r17, 2) + _mm256_extract_epi16(r17, 3) + _mm256_extract_epi16(r17, 4);
 
 			// Try using add_epi16 when finnished to see if faster
 
