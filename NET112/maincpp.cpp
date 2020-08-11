@@ -1,11 +1,6 @@
-
-
 #include "Header.h"
 
-
-
 using namespace std;
-
 
 
 int main() {
@@ -30,7 +25,7 @@ int main() {
 
 	// Time set to 50 for accuracy, repeats 50 times.
 
-	for (int it = 0; it != 1; it++) {
+	for (int it = 0; it != 50; it++) {
 		Gaussian_Blur_AVX();
 		//Gaussian_Blur_default();
 	}
@@ -70,8 +65,6 @@ int main() {
 }
 
 
-
-
 void print_message(char *s, bool outcome) {
 
 	if (outcome == true)
@@ -85,7 +78,7 @@ void print_message(char *s, bool outcome) {
 void Gaussian_Blur_AVX() {
 
 	__m256i r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r14, r15, r16, r17, const0, const1, const2;
-	short int row, col;
+	short int row, col, temp;
 	int result;
 
 	const0 = _mm256_set_epi16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 5, 4, 2);
@@ -94,7 +87,7 @@ void Gaussian_Blur_AVX() {
 
 
 	for (row = 2; row < N - 2; row++) {
-		for (col = 2; col < M - 2; col++) {//I have put an '?' here as you will exceed the array bounds. Although it will work this is bad practice
+		for (col = 2; col < M - 16; col++) {
 
 
 			//load 16 short ints into r0. Below, you will need to process the first 5 only. 
@@ -135,16 +128,16 @@ void Gaussian_Blur_AVX() {
 		}
 
 
-		//for (col = 0; col < M - 2; col++) {
-		//	temp = 0;
-		//	for (int rowOffset = -2; rowOffset <= 2; rowOffset++) {
-		//		for (int colOffset = -2; colOffset <= 2; colOffset++) {
+		for (col = 1008; col < M - 2; col++) {
+			temp = 0;
+			for (int rowOffset = -2; rowOffset <= 2; rowOffset++) {
+				for (int colOffset = -2; colOffset <= 2; colOffset++) {
 
-		//			temp += in_image[row + rowOffset][col + colOffset] * gaussianMask[2 + rowOffset][2 + colOffset];
-		//		}
-		//	}
-		//	filt_image[row][col] = temp / 159;
-		//}
+					temp += in_image[row + rowOffset][col + colOffset] * gaussianMask[2 + rowOffset][2 + colOffset];
+				}
+			}
+			filt_image[row][col] = temp / 159;
+		}
 
 
 	}
