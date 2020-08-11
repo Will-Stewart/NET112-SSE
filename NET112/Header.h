@@ -19,7 +19,7 @@
 #define P 1024
 
 
-void Gaussian_Blur_AVX(int firstCol, int secondCol);
+void Gaussian_Blur_AVX(int firstCol, int secondCol, bool needEdge);
 void Gaussian_Blur_default();
 void Gaussian_Blur_default_unrolled();
 bool compare_Gaussian_images();

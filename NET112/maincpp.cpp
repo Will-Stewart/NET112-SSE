@@ -33,10 +33,10 @@ int main() {
 	
 		// Threads implemented for 4 thread multithreading on 4 sections of the image simultaneously
 
-		std::thread worker1(Gaussian_Blur_AVX,2,768);
-		std::thread worker2(Gaussian_Blur_AVX,256,512);
-		std::thread worker3(Gaussian_Blur_AVX,512,254);
-		std::thread worker4(Gaussian_Blur_AVX,768,16);
+		std::thread worker1(Gaussian_Blur_AVX,2,768, false);
+		std::thread worker2(Gaussian_Blur_AVX,256,512, false);
+		std::thread worker3(Gaussian_Blur_AVX,512,254, false);
+		std::thread worker4(Gaussian_Blur_AVX,768,16, true);
 
 		worker1.join();
 		worker2.join();
@@ -92,7 +92,7 @@ void print_message(char *s, bool outcome) {
 
 
 
-void Gaussian_Blur_AVX(int firstCol, int secondCol) {
+void Gaussian_Blur_AVX(int firstCol, int secondCol, bool needEdge) {
 
 	__m256i r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r14, r15, r16, r17, const0, const1, const2;
 	short int row, col, temp;
@@ -144,24 +144,22 @@ void Gaussian_Blur_AVX(int firstCol, int secondCol) {
 
 
 		// Used for completing image as to not exceed aray bounds using previous algorithm
+		// If statement to check if algorithm is needed in this thread
 
+		if (needEdge == true)
+		{
+			for (col = 1008; col < M - 2; col++) {
+				temp = 0;
+				for (int rowOffset = -2; rowOffset <= 2; rowOffset++) {
+					for (int colOffset = -2; colOffset <= 2; colOffset++) {
 
-
-
-		// Remember to fix this for multithreading
-
-
-		
-		for (col = 1008; col < M - 2; col++) {
-			temp = 0;
-			for (int rowOffset = -2; rowOffset <= 2; rowOffset++) {
-				for (int colOffset = -2; colOffset <= 2; colOffset++) {
-
-					temp += in_image[row + rowOffset][col + colOffset] * gaussianMask[2 + rowOffset][2 + colOffset];
+						temp += in_image[row + rowOffset][col + colOffset] * gaussianMask[2 + rowOffset][2 + colOffset];
+					}
 				}
+				filt_image[row][col] = temp / 159;
 			}
-			filt_image[row][col] = temp / 159;
 		}
+
 
 	}
 
