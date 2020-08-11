@@ -31,8 +31,7 @@ int main() {
 	// Time set to 50 for accuracy, repeats 50 times.
 
 	for (int it = 0; it != 1; it++) {
-		Gaussian_Blur_test();
-		//Gaussian_Blur_default_unrolled();
+		Gaussian_Blur_AVX();
 		//Gaussian_Blur_default();
 	}
 
@@ -82,46 +81,8 @@ void print_message(char *s, bool outcome) {
 
 }
 
+
 void Gaussian_Blur_AVX() {
-
-	__m256i r0, r1, r2, r3, r4, r5, r6, r7;
-	__m256i r8, r9, r10, r14, r15, const0, const1, const2, ex1, ex2, ex3;
-	__m128i t0, t1, t2, t3, t4, t5,c0,c1,c2;
-	int i, j;
-	int temp;
-
-
-	const0 = _mm256_set_epi16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 5, 4, 2);
-	const1 = _mm256_set_epi16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 9, 12, 9, 4);
-	const2 = _mm256_set_epi16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 12, 15, 12, 5);
-
-	c0 = _mm_set_epi16(0, 0, 0, 2, 4, 5, 4, 2);
-	c1 = _mm_set_epi16(0, 0, 0, 4, 9, 12, 9, 4);
-	c2 = _mm_set_epi16(0, 0, 0, 5, 12, 15, 12, 5);
-
-   
-}
-
-void Gaussian_Blur_SSE() {
-
-	
-	__m128i t0, t1, t2, t3, t4, t5, c0, c1, c2;
-	int i, j;
-	int temp;
-
-
-	c0 = _mm_set_epi16(0, 0, 0, 2, 4, 5, 4, 2);
-	c1 = _mm_set_epi16(0, 0, 0, 4, 9, 12, 9, 4);
-	c2 = _mm_set_epi16(0, 0, 0, 5, 12, 15, 12, 5);
-
-
-}
-
-
-// Temporary working area for solution
-
-
-void Gaussian_Blur_test() {
 
 	__m256i r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r14, r15, r16, r17, const0, const1, const2;
 	short int row, col;
@@ -145,7 +106,7 @@ void Gaussian_Blur_test() {
 			r4 = _mm256_loadu_si256((__m256i*) & in_image[row + 2][col - 2]);
 
 
-			// use  ...=_mm256_madd_epi16(...) MORE THAN ONE TIMES
+			// Multiplies the input values from image with the gaussian mask
 
 			r5 = _mm256_maddubs_epi16(r0, const0);
 			r6 = _mm256_maddubs_epi16(r1, const1);
@@ -154,29 +115,24 @@ void Gaussian_Blur_test() {
 			r9 = _mm256_maddubs_epi16(r4, const0);
 
 
-			// use ...=_mm256_add_epi32(...) MORE THAN ONE TIMES
+			// Adds together all values from all r# arrays vertically
 
 			r14 = _mm256_add_epi16(r5, r6);
 			r15 = _mm256_add_epi16(r7, r8);
 			r16 = _mm256_add_epi16(r14, r15);
 			r17 = _mm256_add_epi16(r9, r16);
 
-			// R16 is final array of values
 
-
-			// I guess adds results of all processed rows together
-
+			// Adds together all values in array to one int 
 
 			result = _mm256_extract_epi16(r17, 0) + _mm256_extract_epi16(r17, 1) + _mm256_extract_epi16(r17, 2) + _mm256_extract_epi16(r17, 3) + _mm256_extract_epi16(r17, 4);
 
 			// Try using add_epi16 when finnished to see if faster
 
 
-			// use temp=_mm256_cvtsi256_si32(...)
+			// Outputs final result pixel
 			filt_image[row][col] = result / 159;
 		}
-
-
 
 
 		//for (col = 0; col < M - 2; col++) {
@@ -191,14 +147,9 @@ void Gaussian_Blur_test() {
 		//}
 
 
-
-
-
 	}
 
 }
-
-
 
 
 void Gaussian_Blur_default_unrolled() {
