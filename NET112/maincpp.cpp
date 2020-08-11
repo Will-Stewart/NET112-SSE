@@ -31,11 +31,17 @@ int main() {
 
 	for (int it = 0; it != 100; it++) {
 	
-		std::thread worker1(Gaussian_Blur_AVX,2,512);
-		std::thread worker2(Gaussian_Blur_AVX,512,16);
+		// Threads implemented for 4 thread multithreading on 4 sections of the image simultaneously
+
+		std::thread worker1(Gaussian_Blur_AVX,2,768);
+		std::thread worker2(Gaussian_Blur_AVX,256,512);
+		std::thread worker3(Gaussian_Blur_AVX,512,254);
+		std::thread worker4(Gaussian_Blur_AVX,768,16);
 
 		worker1.join();
 		worker2.join();
+		worker3.join();
+		worker4.join();
 
 		//Gaussian_Blur_default();
 	}
@@ -138,6 +144,13 @@ void Gaussian_Blur_AVX(int firstCol, int secondCol) {
 
 
 		// Used for completing image as to not exceed aray bounds using previous algorithm
+
+
+
+
+		// Remember to fix this for multithreading
+
+
 		
 		for (col = 1008; col < M - 2; col++) {
 			temp = 0;
