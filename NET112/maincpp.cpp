@@ -25,7 +25,7 @@ int main() {
 
 	// Time set to 50 for accuracy, repeats 50 times.
 
-	for (int it = 0; it != 50; it++) {
+	for (int it = 0; it != 100; it++) {
 		Gaussian_Blur_AVX();
 		//Gaussian_Blur_default();
 	}
@@ -101,7 +101,7 @@ void Gaussian_Blur_AVX() {
 
 			// Multiplies the input values from image with the gaussian mask
 
-			r5 = _mm256_maddubs_epi16(r0, const0);
+			r5 = _mm256_maddubs_epi16(r0, const0); 
 			r6 = _mm256_maddubs_epi16(r1, const1);
 			r7 = _mm256_maddubs_epi16(r2, const2);
 			r8 = _mm256_maddubs_epi16(r3, const1);
@@ -120,13 +120,13 @@ void Gaussian_Blur_AVX() {
 
 			result = _mm256_extract_epi16(r17, 0) + _mm256_extract_epi16(r17, 1) + _mm256_extract_epi16(r17, 2) + _mm256_extract_epi16(r17, 3) + _mm256_extract_epi16(r17, 4);
 
-			// Try using add_epi16 when finnished to see if faster
-
-
 			// Outputs final result pixel
 			filt_image[row][col] = result / 159;
+
 		}
 
+
+		// Used for completing image as to not exceed aray bounds using previous algorithm
 
 		for (col = 1008; col < M - 2; col++) {
 			temp = 0;
