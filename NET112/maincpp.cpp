@@ -1,6 +1,9 @@
 #include "Header.h"
+#include <thread> 
+#include <iostream>
 
 using namespace std;
+
 
 
 int main() {
@@ -23,10 +26,17 @@ int main() {
 	auto start = std::chrono::high_resolution_clock::now();
 
 
-	// Time set to 50 for accuracy, repeats 50 times.
+	// Time set to 100 for accuracy, repeats 100 times.
+
 
 	for (int it = 0; it != 100; it++) {
-		Gaussian_Blur_AVX();
+	
+		std::thread worker1(Gaussian_Blur_AVX,2,512);
+		std::thread worker2(Gaussian_Blur_AVX,512,16);
+
+		worker1.join();
+		worker2.join();
+
 		//Gaussian_Blur_default();
 	}
 
@@ -75,7 +85,8 @@ void print_message(char *s, bool outcome) {
 }
 
 
-void Gaussian_Blur_AVX() {
+
+void Gaussian_Blur_AVX(int firstCol, int secondCol) {
 
 	__m256i r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r14, r15, r16, r17, const0, const1, const2;
 	short int row, col, temp;
@@ -87,7 +98,7 @@ void Gaussian_Blur_AVX() {
 
 
 	for (row = 2; row < N - 2; row++) {
-		for (col = 2; col < M - 16; col++) {
+		for (col = firstCol; col < M - secondCol; col++) {
 
 
 			//load 16 short ints into r0. Below, you will need to process the first 5 only. 
@@ -127,7 +138,7 @@ void Gaussian_Blur_AVX() {
 
 
 		// Used for completing image as to not exceed aray bounds using previous algorithm
-
+		
 		for (col = 1008; col < M - 2; col++) {
 			temp = 0;
 			for (int rowOffset = -2; rowOffset <= 2; rowOffset++) {
@@ -138,7 +149,6 @@ void Gaussian_Blur_AVX() {
 			}
 			filt_image[row][col] = temp / 159;
 		}
-
 
 	}
 
