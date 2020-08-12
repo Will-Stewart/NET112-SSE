@@ -1,2 +1,2 @@
 # NET112-SSE
-Optimising a program using the SSE instruction set
+Optimising a program using the AVX instruction set
