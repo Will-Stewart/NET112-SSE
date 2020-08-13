@@ -86,9 +86,11 @@ void print_message(char *s, bool outcome) {
 void Gaussian_Blur_SSE(){
 
 	__m256i r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r14, r15, r16, r17, r18, const0, const1, const2;
+	__m256i p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p14, p15, p16, p17, p18;
 	__m128i t0, t1, t2, t3, t4;
+	__m128i u0, u1, u2, u3, u4;
 	short int row, col, temp;
-	int result1, result2, result3;
+	int result1, result2;
 
 
 	const0 = _mm256_set_epi16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 5, 4, 2);
@@ -99,7 +101,7 @@ void Gaussian_Blur_SSE(){
 	for (row = 2; row < N - 2; row++) {
 
 
-		for (col = 2; col < M - 14; col++) {
+		for (col = 2; col < M - 14; col+= 2) {
 
 
 			//load 16 short ints into r0. Below, you will need to process the first 5 only. 
@@ -110,6 +112,12 @@ void Gaussian_Blur_SSE(){
 			r3 = _mm256_loadu_si256((__m256i*) & in_image[row + 1][col - 2]);
 			r4 = _mm256_loadu_si256((__m256i*) & in_image[row + 2][col - 2]);
 
+			p0 = _mm256_loadu_si256((__m256i*) & in_image[row - 2][col - 1]);
+			p1 = _mm256_loadu_si256((__m256i*) & in_image[row - 1][col - 1]);
+			p2 = _mm256_loadu_si256((__m256i*) & in_image[row - 0][col - 1]);
+			p3 = _mm256_loadu_si256((__m256i*) & in_image[row + 1][col - 1]);
+			p4 = _mm256_loadu_si256((__m256i*) & in_image[row + 2][col - 1]);
+
 
 			// Multiplies the input values from image with the gaussian mask
 
@@ -119,6 +127,12 @@ void Gaussian_Blur_SSE(){
 			r8 = _mm256_madd_epi16(r3, const1);
 			r9 = _mm256_madd_epi16(r4, const0);
 
+			p5 = _mm256_madd_epi16(p0, const0);
+			p6 = _mm256_madd_epi16(p1, const1);
+			p7 = _mm256_madd_epi16(p2, const2);
+			p8 = _mm256_madd_epi16(p3, const1);
+			p9 = _mm256_madd_epi16(p4, const0);
+
 
 			// Adds together all values from all r# arrays vertically
 
@@ -126,6 +140,12 @@ void Gaussian_Blur_SSE(){
 			r15 = _mm256_add_epi16(r7, r8);
 			r16 = _mm256_add_epi16(r14, r15);
 			r17 = _mm256_add_epi16(r9, r16);
+
+			p14 = _mm256_add_epi16(p5, p6);
+			p15 = _mm256_add_epi16(p7, p8);
+			p16 = _mm256_add_epi16(p14, p15);
+			p17 = _mm256_add_epi16(p9, p16);
+
 
 
 			// Adds together all values in array to one int 
@@ -138,8 +158,21 @@ void Gaussian_Blur_SSE(){
 
 			result1 = _mm256_cvtsi256_si32(_mm256_castsi128_si256(t4));
 
+
+
+			u0 = _mm256_castsi256_si128(p17);
+			u1 = _mm_shuffle_epi32(u0, _MM_SHUFFLE(1, 0, 3, 2));
+			u2 = _mm_add_epi32(u0, u1);
+			u3 = _mm_shufflelo_epi16(u2, _MM_SHUFFLE(1, 0, 3, 2));
+			u4 = _mm_add_epi32(u2, u3);
+
+			result2 = _mm256_cvtsi256_si32(_mm256_castsi128_si256(u4));
+
+
+
 			// Outputs final result pixel
 		    filt_image[row][col] = result1 / 159;
+		    filt_image[row][col + 1] = result2 / 159;
 
 		}
 
