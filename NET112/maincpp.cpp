@@ -103,6 +103,7 @@ void Gaussian_Blur_SSE(){
 
 		for (col = 2; col < M - 14; col+= 2) {
 
+			// Two versions of each block of code can be seen as 2 pixels are genrated per itteration
 
 			//load 16 short ints into r0. Below, you will need to process the first 5 only. 
 
@@ -147,7 +148,6 @@ void Gaussian_Blur_SSE(){
 			p17 = _mm256_add_epi16(p9, p16);
 
 
-
 			// Adds together all values in array to one int 
 
 			t0 = _mm256_castsi256_si128(r17);
@@ -158,8 +158,6 @@ void Gaussian_Blur_SSE(){
 
 			result1 = _mm256_cvtsi256_si32(_mm256_castsi128_si256(t4));
 
-
-
 			u0 = _mm256_castsi256_si128(p17);
 			u1 = _mm_shuffle_epi32(u0, _MM_SHUFFLE(1, 0, 3, 2));
 			u2 = _mm_add_epi32(u0, u1);
@@ -169,8 +167,8 @@ void Gaussian_Blur_SSE(){
 			result2 = _mm256_cvtsi256_si32(_mm256_castsi128_si256(u4));
 
 
+			// Outputs final result pixels
 
-			// Outputs final result pixel
 		    filt_image[row][col] = result1 / 159;
 		    filt_image[row][col + 1] = result2 / 159;
 
@@ -179,7 +177,6 @@ void Gaussian_Blur_SSE(){
 
 		// Used for completing image as to not exceed aray bounds using previous algorithm
 		// If statement to check if algorithm is needed in this thread
-
 
 		for (col = 1010; col < M - 2; col++) {
 			temp = 0;
@@ -191,9 +188,6 @@ void Gaussian_Blur_SSE(){
 			}
 			filt_image[row][col] = temp / 159;
 		}
-
-
-
 	}
 
 }
