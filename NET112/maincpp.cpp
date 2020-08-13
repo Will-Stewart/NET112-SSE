@@ -33,17 +33,12 @@ int main() {
 	
 		// Threads implemented for 4 thread multithreading on 4 sections of the image simultaneously
 
-		std::thread worker1(Gaussian_Blur_AVX,2,768, false);
-		std::thread worker2(Gaussian_Blur_AVX,256,512, false);
-		std::thread worker3(Gaussian_Blur_AVX,512,254, false);
-		std::thread worker4(Gaussian_Blur_AVX,768,16, true);
-
+		std::thread worker1(Gaussian_Blur_AVX,2,16, true);
 		worker1.join();
-		worker2.join();
-		worker3.join();
-		worker4.join();
+
 
 		//Gaussian_Blur_default();
+		//testFunc();
 	}
 
 	auto finish = std::chrono::high_resolution_clock::now();
@@ -91,12 +86,13 @@ void print_message(char *s, bool outcome) {
 }
 
 
-
 void Gaussian_Blur_AVX(int firstCol, int secondCol, bool needEdge) {
 
-	__m256i r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r14, r15, r16, r17, const0, const1, const2;
+	__m256i r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24, r25, r26 , const0, const1, const2;
+	__m128i h0, h1, h2, h3, h4, h5;
 	short int row, col, temp;
-	int result;
+	int result1, result2, result3;
+
 
 	const0 = _mm256_set_epi16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4, 5, 4, 2);
 	const1 = _mm256_set_epi16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 9, 12, 9, 4);
@@ -118,11 +114,11 @@ void Gaussian_Blur_AVX(int firstCol, int secondCol, bool needEdge) {
 
 			// Multiplies the input values from image with the gaussian mask
 
-			r5 = _mm256_maddubs_epi16(r0, const0); 
-			r6 = _mm256_maddubs_epi16(r1, const1);
-			r7 = _mm256_maddubs_epi16(r2, const2);
-			r8 = _mm256_maddubs_epi16(r3, const1);
-			r9 = _mm256_maddubs_epi16(r4, const0);
+			r5 = _mm256_madd_epi16(r0, const0);
+			r6 = _mm256_madd_epi16(r1, const1);
+			r7 = _mm256_madd_epi16(r2, const2);
+			r8 = _mm256_madd_epi16(r3, const1);
+			r9 = _mm256_madd_epi16(r4, const0);
 
 
 			// Adds together all values from all r# arrays vertically
@@ -135,10 +131,12 @@ void Gaussian_Blur_AVX(int firstCol, int secondCol, bool needEdge) {
 
 			// Adds together all values in array to one int 
 
-			result = _mm256_extract_epi16(r17, 0) + _mm256_extract_epi16(r17, 1) + _mm256_extract_epi16(r17, 2) + _mm256_extract_epi16(r17, 3) + _mm256_extract_epi16(r17, 4);
+
+			result1 = _mm256_extract_epi16(r17, 0) + _mm256_extract_epi16(r17, 1) + _mm256_extract_epi16(r17, 2) + _mm256_extract_epi16(r17, 3) + _mm256_extract_epi16(r17, 4);
 
 			// Outputs final result pixel
-			filt_image[row][col] = result / 159;
+		    filt_image[row][col] = result1 / 159;
+
 
 		}
 
@@ -164,6 +162,7 @@ void Gaussian_Blur_AVX(int firstCol, int secondCol, bool needEdge) {
 	}
 
 }
+
 
 
 void Gaussian_Blur_default_unrolled() {

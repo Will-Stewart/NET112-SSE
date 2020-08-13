@@ -23,6 +23,7 @@ void Gaussian_Blur_AVX(int firstCol, int secondCol, bool needEdge);
 void Gaussian_Blur_default();
 void Gaussian_Blur_default_unrolled();
 bool compare_Gaussian_images();
+void testFunc();
 
 
 void Sobel_default();
