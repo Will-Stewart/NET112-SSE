@@ -38,7 +38,6 @@ int main() {
 
 
 		//Gaussian_Blur_default();
-		//testFunc();
 	}
 
 	auto finish = std::chrono::high_resolution_clock::now();
@@ -88,8 +87,8 @@ void print_message(char *s, bool outcome) {
 
 void Gaussian_Blur_AVX(int firstCol, int secondCol, bool needEdge) {
 
-	__m256i r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24, r25, r26 , const0, const1, const2;
-	__m128i h0, h1, h2, h3, h4, h5;
+	__m256i r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r14, r15, r16, r17, r18, const0, const1, const2;
+	__m128i t0, t1, t2, t3, t4;
 	short int row, col, temp;
 	int result1, result2, result3;
 
@@ -131,12 +130,16 @@ void Gaussian_Blur_AVX(int firstCol, int secondCol, bool needEdge) {
 
 			// Adds together all values in array to one int 
 
+			t0 = _mm256_castsi256_si128(r17);
+			t1 = _mm_shuffle_epi32(t0, _MM_SHUFFLE(1, 0, 3, 2)); 
+			t2 = _mm_add_epi32(t0, t1);
+			t3 = _mm_shufflelo_epi16(t2, _MM_SHUFFLE(1, 0, 3, 2)); 
+			t4 = _mm_add_epi32(t2, t3); 
 
-			result1 = _mm256_extract_epi16(r17, 0) + _mm256_extract_epi16(r17, 1) + _mm256_extract_epi16(r17, 2) + _mm256_extract_epi16(r17, 3) + _mm256_extract_epi16(r17, 4);
+			result1 = _mm256_cvtsi256_si32(_mm256_castsi128_si256(t4));
 
 			// Outputs final result pixel
 		    filt_image[row][col] = result1 / 159;
-
 
 		}
 
