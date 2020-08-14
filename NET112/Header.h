@@ -22,9 +22,7 @@
 void Gaussian_Blur_AVX();
 void Gaussian_Blur_SSE();
 void Gaussian_Blur_default();
-void Gaussian_Blur_default_unrolled();
 bool compare_Gaussian_images();
-
 
 void Sobel_default();
 bool compare_Sobel_images();
