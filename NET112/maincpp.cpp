@@ -85,6 +85,7 @@ void print_message(char *s, bool outcome) {
 
 void Gaussian_Blur_SSE(){
 
+
 	__m256i r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r14, r15, r16, r17, r18, const0, const1, const2;
 	__m256i p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p14, p15, p16, p17, p18;
 	__m128i t0, t1, t2, t3, t4;
@@ -100,12 +101,11 @@ void Gaussian_Blur_SSE(){
 
 	for (row = 2; row < N - 2; row++) {
 
-
 		for (col = 2; col < M - 14; col+= 2) {
 
-			// Two versions of each block of code can be seen as 2 pixels are genrated per itteration
-
-			//load 16 short ints into each register. 
+			/// Two versions of each block of code can be seen as 2 pixels are genrated per itteration. For example the r# registers are used for 'col' and the p# registers are used for 'col +1'
+			
+			//load 16 short ints into each register, each register corosponds to a row of pixels 
 
 			r0 = _mm256_loadu_si256((__m256i*) & in_image[row - 2][col - 2]);
 			r1 = _mm256_loadu_si256((__m256i*) & in_image[row - 1][col - 2]);
@@ -120,7 +120,7 @@ void Gaussian_Blur_SSE(){
 			p4 = _mm256_loadu_si256((__m256i*) & in_image[row + 2][col - 1]);
 
 
-			// Multiplies the input values from image with the gaussian mask
+			// Multiplies the input values from the image in each register with the values from the gaussian mask
 
 			r5 = _mm256_madd_epi16(r0, const0);
 			r6 = _mm256_madd_epi16(r1, const1);
@@ -135,7 +135,7 @@ void Gaussian_Blur_SSE(){
 			p9 = _mm256_madd_epi16(p4, const0);
 
 
-			// Adds together all values from all r# arrays vertically
+			// Adds together all values from all r# and p# arrays consecutively to get the total results of the r# and p# registers
 
 			r14 = _mm256_add_epi16(r5, r6);
 			r15 = _mm256_add_epi16(r7, r8);
@@ -148,7 +148,7 @@ void Gaussian_Blur_SSE(){
 			p17 = _mm256_add_epi16(p9, p16);
 
 
-			// Adds together all values in array to one int 
+			// Adds together all values in the registers to one int, add and shuffle used to avoid high latency HADD function
 
 			t0 = _mm256_castsi256_si128(r17);
 			t1 = _mm_shuffle_epi32(t0, _MM_SHUFFLE(1, 0, 3, 2)); 
@@ -175,8 +175,7 @@ void Gaussian_Blur_SSE(){
 		}
 
 
-		// Used for completing image as to not exceed aray bounds using previous algorithm
-		// If statement to check if algorithm is needed in this thread
+		// Seperate algorithm used for completing final pixels in image as to not exceed aray bounds using previous algorithm
 
 		for (col = 1010; col < M - 2; col++) {
 			temp = 0;
