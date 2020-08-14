@@ -105,7 +105,7 @@ void Gaussian_Blur_SSE(){
 
 			// Two versions of each block of code can be seen as 2 pixels are genrated per itteration
 
-			//load 16 short ints into r0. Below, you will need to process the first 5 only. 
+			//load 16 short ints into each register. 
 
 			r0 = _mm256_loadu_si256((__m256i*) & in_image[row - 2][col - 2]);
 			r1 = _mm256_loadu_si256((__m256i*) & in_image[row - 1][col - 2]);
