@@ -27,6 +27,7 @@ The algorithm is run on the image 100 times in order to gain an accurate mean ti
 
 ### Release Build
 
+***Compiler Optimisations***
 > Optimisation : Maximum Optimization (Favor Speed) (/O2)
 
 > Inline Function Expansion : Any Suitable (/Ob2)
